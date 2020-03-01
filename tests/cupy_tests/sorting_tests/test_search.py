@@ -249,9 +249,9 @@ class TestArgwhere(unittest.TestCase):
 
     @testing.for_all_dtypes()
     @testing.numpy_cupy_array_list_equal()
-    def test_argwhere(self, xp):
+    def test_argwhere(self, xp, dtype):
         x = xp.array([[2, 3, 0, 1],
-                      [0, 6, 0, 0]])
+                      [0, 6, 0, 0]], dtype=dtype)
         return xp.argwhere(x)
 
 
