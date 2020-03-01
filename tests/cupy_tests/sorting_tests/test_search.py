@@ -244,6 +244,17 @@ class TestNonzero(unittest.TestCase):
         return xp.nonzero(array)
 
 
+@testing.gpu
+class TestWhereError(unittest.TestCase):
+
+    @testing.for_all_dtypes()
+    @testing.numpy_cupy_array_list_equal()
+    def test_one_argument(self, xp):
+        x = xp.array([[2, 3, 0, 1],
+                      [0, 6, 0, 0]])
+        return xp.argwhere(x)
+
+
 @testing.parameterize(
     {'array': numpy.array(0)},
     {'array': numpy.array(1)},
