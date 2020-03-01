@@ -244,17 +244,6 @@ class TestNonzero(unittest.TestCase):
         return xp.nonzero(array)
 
 
-@testing.gpu
-class TestArgwhere(unittest.TestCase):
-
-    @testing.for_all_dtypes()
-    @testing.numpy_cupy_array_list_equal()
-    def test_argwhere(self, xp, dtype):
-        x = xp.array([[2, 3, 0, 1],
-                      [0, 6, 0, 0]], dtype=dtype)
-        return xp.argwhere(x)
-
-
 @testing.parameterize(
     {'array': numpy.array(0)},
     {'array': numpy.array(1)},
@@ -287,6 +276,23 @@ class TestFlatNonzero(unittest.TestCase):
     def test_flatnonzero(self, xp, dtype):
         array = xp.array(self.array, dtype=dtype)
         return xp.flatnonzero(array)
+
+
+@testing.parameterize(
+    {'array': numpy.random.randint(0, 2, (20,))},
+    {'array': numpy.random.randn(3, 2, 4)},
+    {'array': numpy.empty((0,))},
+    {'array': numpy.empty((0, 2))},
+    {'array': numpy.empty((0, 2, 0))},
+)
+@testing.gpu
+class TestArgwhere(unittest.TestCase):
+
+    @testing.for_all_dtypes()
+    @testing.numpy_cupy_array_list_equal()
+    def test_argwhere(self, xp, dtype):
+        array = xp.array(self.array, dtype=dtype)
+        return xp.argwhere(array)
 
 
 @testing.gpu
