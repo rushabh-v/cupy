@@ -76,6 +76,34 @@ cdef tuple _ndarray_nonzero(ndarray self):
         return tuple([dst[i] for i in range(ndim)])
 
 
+cdef ndarray _ndarray_argwhere(ndarray self):
+    cdef Py_ssize_t count_nonzero
+    cdef int ndim
+    dtype = numpy.int64
+    if self.size == 0:
+        count_nonzero = 0
+    else:
+        r = self.ravel()
+        nonzero = cupy.core.not_equal(r, 0, ndarray(r.shape, dtype))
+        del r
+        scan_index = _math.scan(nonzero, op=_math.scan_op.SCAN_SUM)
+        count_nonzero = int(scan_index[-1])  # synchronize!
+    ndim = max(<int>self._shape.size(), 1)
+    if count_nonzero == 0:
+        return (ndarray((0,), dtype=dtype),) * ndim
+
+    if ndim <= 1:
+        dst = ndarray((count_nonzero,), dtype=dtype)
+        _nonzero_kernel_1d(nonzero, scan_index, dst)
+        return dst,
+    else:
+        nonzero.shape = self.shape
+        scan_index.shape = self.shape
+        dst = ndarray((ndim, count_nonzero), dtype=dtype)
+        _nonzero_kernel(nonzero, scan_index, dst)
+        return dst
+
+
 cdef _ndarray_scatter_add(ndarray self, slices, value):
     _scatter_op(self, slices, value, 'add')
 
