@@ -362,7 +362,7 @@ cdef ndarray _simple_getitem(ndarray a, list slice_list):
 
 _nonzero_kernel_1d = ElementwiseKernel(
     'T src, S index', 'raw S dst',
-    'if (src != 0) dst[index - 1][0] = i',
+    'if (src != 0) dst[index - 1] = i',
     'nonzero_kernel_1d')
 
 
