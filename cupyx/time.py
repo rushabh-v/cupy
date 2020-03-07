@@ -49,7 +49,7 @@ def repeat(func, args=(), kwargs={}, n=10000, *, name=None, n_warmup=10):
 
     if not callable(func):
         raise ValueError('`func` should be a callable object.')
-    if args not isinstance(args, tuple):
+    if args and not isinstance(args, tuple):
         raise ValueError('`args` should be of tuple type.')
     if not isinstance(kwargs, dict):
         raise ValueError('`args` should be of tuple type.')
