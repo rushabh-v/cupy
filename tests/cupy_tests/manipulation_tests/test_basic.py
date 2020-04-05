@@ -2,6 +2,7 @@ import itertools
 import unittest
 
 import numpy
+import pytest
 
 import cupy
 from cupy import cuda
@@ -125,3 +126,42 @@ class TestCopytoFromScalar(unittest.TestCase):
             self.dst_shape, xp, dtype) % 2).astype(xp.bool_)
         xp.copyto(dst, self.src, where=mask)
         return dst
+
+
+@testing.parameterize(
+    *testing.product(
+        {'shape': [(), (0,), (1,), (2, 3), (2, 3, 4)]}))
+@testing.gpu
+class TestPutmask(unittest.TestCase):
+
+    @testing.numpy_cupy_array_equal()
+    def test_putmask(self, xp):
+        a = testing.shaped_arange(self.shape, xp)
+        xp.putmask(a, a%2==0, a**2)
+        return a
+
+
+@testing.parameterize(
+    *testing.product(
+        {'shape': [(), (0,), (1,), (2, 3), (2, 3, 4)],
+         'values_shape': [(2), (3, 1), (5)]}))
+@testing.gpu
+class TestPutmaskNonEqual(unittest.TestCase):
+
+    @testing.numpy_cupy_array_equal()
+    def test_putmask(self, xp):
+        a = testing.shaped_arange(self.shape, xp)
+        values = testing.shaped_random(self.values_shape)
+        xp.putmask(a, a>2, values)
+        return a
+
+
+@testing.gpu
+class TestPutmaskRaises(unittest.TestCase):
+
+    def test_putmask(self):
+        for xp in (numpy, cupy):
+            a = testing.shaped_arange((2,), xp)
+            values = testing.shaped_arange((1,), xp)
+            with pytest.raises(ValueError):
+                xp.putmask(a, a%2==0, values)
